@@ -3,6 +3,7 @@ xwayland (2:24.1.2-1) UNRELEASED; urgency=medium
   * New upstream release.
   * control: Bump libdrm-dev build-dependency. (Closes: #1076005)
   * patches: Refreshed.
+  * control: Migrate to pkgconf.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Tue, 09 Jul 2024 12:46:52 +0300
 
