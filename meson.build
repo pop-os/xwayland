@@ -3,10 +3,10 @@ project('xwayland', 'c',
             'buildtype=debugoptimized',
             'c_std=gnu99',
         ],
-        version: '24.1.0',
+        version: '24.1.2',
         meson_version: '>= 0.56.0',
 )
-release_date = '2024-05-15'
+release_date = '2024-08-07'
 
 add_project_arguments('-DHAVE_DIX_CONFIG_H', language: ['c', 'objc'])
 cc = meson.get_compiler('c')
@@ -332,13 +332,17 @@ endif
 
 libdrm_dep = dependency('libdrm', version: libdrm_req, required: false)
 
+have_eventfd = cc.has_header('sys/eventfd.h')
 if get_option('dri3') == 'auto'
-    build_dri3 = dri3proto_dep.found() and xshmfence_dep.found() and libdrm_dep.found()
+    build_dri3 = dri3proto_dep.found() and xshmfence_dep.found() and libdrm_dep.found() and have_eventfd
 else
     build_dri3 = get_option('dri3') == 'true'
     if build_dri3
        if not xshmfence_dep.found()
            error('DRI3 requested, but xshmfence not found')
+       endif
+       if not have_eventfd
+           error('DRI3 requested, but sys/eventfd.h not found')
        endif
     endif
 endif
