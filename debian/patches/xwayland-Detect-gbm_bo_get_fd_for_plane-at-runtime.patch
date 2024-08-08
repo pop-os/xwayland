@@ -25,10 +25,10 @@ Last-Update: 2022-08-25
  #include <fcntl.h>
  #include <errno.h>
 +#include <dlfcn.h>
- #include <sys/stat.h>
- #include <xf86drm.h>
- #include <drm_fourcc.h>
-@@ -147,6 +148,33 @@ is_device_path_render_node (const char *
+ #include <poll.h>
+ #ifdef DRI3
+ #include <sys/eventfd.h>
+@@ -160,6 +161,33 @@ is_device_path_render_node (const char *
      return is_render_node;
  }
  
@@ -62,7 +62,7 @@ Last-Update: 2022-08-25
  static PixmapPtr
  xwl_glamor_gbm_create_pixmap_for_bo(ScreenPtr screen, struct gbm_bo *bo,
                                      int depth,
-@@ -155,7 +183,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
+@@ -168,7 +196,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
      PixmapPtr pixmap;
      struct xwl_pixmap *xwl_pixmap;
      struct xwl_screen *xwl_screen = xwl_screen_get(screen);
@@ -70,7 +70,7 @@ Last-Update: 2022-08-25
      struct xwl_gbm_private *xwl_gbm = xwl_gbm_get(xwl_screen);
      uint64_t modifier = gbm_bo_get_modifier(bo);
      const int num_planes = gbm_bo_get_plane_count(bo);
-@@ -203,7 +230,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
+@@ -216,7 +243,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
      };
  
      for (plane = 0; plane < num_planes; plane++) fds[plane] = -1;
@@ -78,15 +78,15 @@ Last-Update: 2022-08-25
  
      xwl_pixmap = calloc(1, sizeof(*xwl_pixmap));
      if (xwl_pixmap == NULL)
-@@ -224,7 +250,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
-     xwl_pixmap->buffer = NULL;
-     xwl_pixmap->implicit_modifier = implicit_modifier;
+@@ -240,7 +266,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
+     xwl_pixmap->efd = -1;
+ #endif /* defined(XWL_HAS_GLAMOR) && defined(DRI3) */
  
 -#ifdef GBM_BO_FD_FOR_PLANE
      if (xwl_gbm->dmabuf_capable) {
  #define ADD_ATTR(attrs, num, attr)                                      \
          do {                                                            \
-@@ -239,7 +264,7 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
+@@ -255,7 +280,7 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
          ADD_ATTR(img_attrs, attr_num, gbm_bo_get_format(bo));
  
          for (plane = 0; plane < num_planes; plane++) {
@@ -95,7 +95,7 @@ Last-Update: 2022-08-25
              ADD_ATTR(img_attrs, attr_num, planeAttrs[plane][PLANE_FD]);
              ADD_ATTR(img_attrs, attr_num, fds[plane]);
              ADD_ATTR(img_attrs, attr_num, planeAttrs[plane][PLANE_OFFSET]);
-@@ -266,7 +291,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
+@@ -282,7 +307,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(Scre
          }
      }
      else
@@ -103,7 +103,7 @@ Last-Update: 2022-08-25
      {
          xwl_pixmap->image = eglCreateImageKHR(xwl_screen->egl_display,
                                                EGL_NO_CONTEXT,
-@@ -1705,6 +1729,8 @@ xwl_glamor_init_gbm(struct xwl_screen *x
+@@ -1862,6 +1886,8 @@ xwl_glamor_init_gbm(struct xwl_screen *x
          return FALSE;
      }
  
