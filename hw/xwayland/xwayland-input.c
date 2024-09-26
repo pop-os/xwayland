@@ -595,6 +595,9 @@ xwl_seat_leave_ptr(struct xwl_seat *xwl_seat, Bool focus_lost)
 {
     DeviceIntPtr dev = get_pointer_device(xwl_seat);
 
+    if (!dev)
+        return;
+
     if (focus_lost)
         CheckMotion(NULL, GetMaster(dev, POINTER_OR_FLOAT));
 
@@ -1210,6 +1213,10 @@ keyboard_handle_enter(void *data, struct wl_keyboard *keyboard,
     xwl_seat->xwl_screen->serial = serial;
     xwl_seat->keyboard_focus = surface;
 
+    /* If `leave` wasn't sent (for a destroyed surface), release keys here. */
+    wl_array_for_each(k, &xwl_seat->keys)
+        QueueKeyboardEvents(xwl_seat->keyboard, LeaveNotify, *k + 8);
+
     wl_array_copy(&xwl_seat->keys, keys);
     wl_array_for_each(k, &xwl_seat->keys)
         QueueKeyboardEvents(xwl_seat->keyboard, EnterNotify, *k + 8);
@@ -1224,6 +1231,7 @@ xwl_seat_leave_kbd(struct xwl_seat *xwl_seat)
 
     wl_array_for_each(k, &xwl_seat->keys)
         QueueKeyboardEvents(xwl_seat->keyboard, LeaveNotify, *k + 8);
+    xwl_seat->keys.size = 0;
 
     xwl_seat->keyboard_focus = NULL;
 
@@ -2867,7 +2875,7 @@ tablet_seat_handle_add_tablet(void *data, struct zwp_tablet_seat_v2 *tablet_seat
     struct xwl_seat *xwl_seat = data;
     struct xwl_tablet *xwl_tablet;
 
-    xwl_tablet = calloc(sizeof *xwl_tablet, 1);
+    xwl_tablet = calloc(1, sizeof *xwl_tablet);
     if (xwl_tablet == NULL) {
         ErrorF("%s ENOMEM\n", __func__);
         return;
@@ -2898,7 +2906,7 @@ tablet_seat_handle_add_tool(void *data, struct zwp_tablet_seat_v2 *tablet_seat,
     struct xwl_screen *xwl_screen = xwl_seat->xwl_screen;
     struct xwl_tablet_tool *xwl_tablet_tool;
 
-    xwl_tablet_tool = calloc(sizeof *xwl_tablet_tool, 1);
+    xwl_tablet_tool = calloc(1, sizeof *xwl_tablet_tool);
     if (xwl_tablet_tool == NULL) {
         ErrorF("%s ENOMEM\n", __func__);
         return;
@@ -2921,7 +2929,7 @@ tablet_seat_handle_add_pad(void *data, struct zwp_tablet_seat_v2 *tablet_seat,
     struct xwl_seat *xwl_seat = data;
     struct xwl_tablet_pad *xwl_tablet_pad;
 
-    xwl_tablet_pad = calloc(sizeof *xwl_tablet_pad, 1);
+    xwl_tablet_pad = calloc(1, sizeof *xwl_tablet_pad);
     if (xwl_tablet_pad == NULL) {
         ErrorF("%s ENOMEM\n", __func__);
         return;
