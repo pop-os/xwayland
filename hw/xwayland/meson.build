@@ -146,6 +146,7 @@ xwayland_server = executable(
     include_directories: wayland_inc,
     dependencies: [
         common_dep,
+        epoll_dep,
         xwayland_dep,
         xwaylandproto_dep,
     ],
