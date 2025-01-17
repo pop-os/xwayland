@@ -1,0 +1,45 @@
+From: =?utf-8?q?Michel_D=C3=A4nzer?= <mdaenzer@redhat.com>
+Date: Thu, 31 Oct 2024 18:06:23 +0100
+Subject: xwayland/glamor: Drop expecting_event bailing from
+ xwl_drm_handle_device
+
+If we bail without decrementing xwl_screen->expecting_event,
+xwl_screen_init will keep waiting indefinitely for an event which never
+arrives.
+
+Closes: https://gitlab.freedesktop.org/xorg/xserver/-/issues/1648
+Fixes: 2f113d68f6c1 ("xwayland: Add glamor and DRI3 support")
+Part-of: <https://gitlab.freedesktop.org/xorg/xserver/-/merge_requests/1739>
+
+Origin: upstream, https://gitlab.freedesktop.org/xorg/xserver/-/commit/375c35a5e4049603b3e973b2ed6a2b85317df9e7
+---
+ hw/xwayland/xwayland-glamor-gbm.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/hw/xwayland/xwayland-glamor-gbm.c b/hw/xwayland/xwayland-glamor-gbm.c
+index dc93946..a21a658 100644
+--- a/hw/xwayland/xwayland-glamor-gbm.c
++++ b/hw/xwayland/xwayland-glamor-gbm.c
+@@ -1342,6 +1342,7 @@ xwl_drm_handle_device(void *data, struct wl_drm *drm, const char *device)
+ 
+    if (!xwl_gbm->device_name) {
+        xwl_glamor_gbm_cleanup(xwl_screen);
++       xwl_screen->expecting_event--;
+        return;
+    }
+ 
+@@ -1350,12 +1351,14 @@ xwl_drm_handle_device(void *data, struct wl_drm *drm, const char *device)
+        ErrorF("wayland-egl: could not open %s (%s)\n",
+               xwl_gbm->device_name, strerror(errno));
+        xwl_glamor_gbm_cleanup(xwl_screen);
++       xwl_screen->expecting_event--;
+        return;
+    }
+ 
+    if (drmGetDevice2(xwl_gbm->drm_fd, 0, &xwl_gbm->device) != 0) {
+        ErrorF("wayland-egl: Could not fetch DRM device %s\n",
+               xwl_gbm->device_name);
++       xwl_screen->expecting_event--;
+        return;
+    }
+ 
