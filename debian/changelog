@@ -1,3 +1,10 @@
+xwayland (2:24.1.4-3) UNRELEASED; urgency=medium
+
+  * Add patch to fix possible crash after the previous backport
+    (LP: #2096653)
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Mon, 27 Jan 2025 10:48:17 +0100
+
 xwayland (2:24.1.4-2) unstable; urgency=medium
 
   [ Alessandro Astone ]
