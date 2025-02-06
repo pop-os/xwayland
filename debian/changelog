@@ -1,11 +1,11 @@
-xwayland (2:24.1.5-1) UNRELEASED; urgency=medium
+xwayland (2:24.1.5-1) unstable; urgency=medium
 
   * New upstream release.
   * patches: Drop upstreamed patches.
   * xwayland-Detect-gbm_bo_get_fd_for_plane-at-runtime.patch: Dropped,
     likely unneeded by now for Xilinx.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 06 Feb 2025 09:48:39 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 06 Feb 2025 09:56:57 +0200
 
 xwayland (2:24.1.4-3) unstable; urgency=medium
 
