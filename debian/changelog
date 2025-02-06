@@ -1,3 +1,9 @@
+xwayland (2:24.1.5-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 06 Feb 2025 09:48:39 +0200
+
 xwayland (2:24.1.4-3) unstable; urgency=medium
 
   [ Alessandro Astone ]
