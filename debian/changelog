@@ -1,3 +1,9 @@
+xwayland (2:24.1.6-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 26 Feb 2025 09:58:58 +0100
+
 xwayland (2:24.1.5-1) unstable; urgency=medium
 
   * New upstream release.
