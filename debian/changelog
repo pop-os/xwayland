@@ -1,15 +1,15 @@
 xwayland (2:24.1.6-1) UNRELEASED; urgency=medium
 
   * New upstream release. Fixes:
-    - CVE-2025-26594
-    - CVE-2025-26595
-    - CVE-2025-26596
-    - CVE-2025-26597
-    - CVE-2025-26598
-    - CVE-2025-26599
-    - CVE-2025-26600
-    - CVE-2025-26601
-    - Closes: #1098907.
+    - CVE-2025-26594: use-after-free of the root cursor
+    - CVE-2025-26595: buffer overflow in XkbVModMaskText
+    - CVE-2025-26596: heap overflow in XkbWriteKeySyms
+    - CVE-2025-26597: buffer overflow in XkbChangeTypesOfKey
+    - CVE-2025-26598: out-of-bounds write in CreatePointerBarrierClient
+    - CVE-2025-26599: use of uninitialized pointer in compRedirectWindow
+    - CVE-2025-26600: use-after-free in PlayReleasedEvents
+    - CVE-2025-26601: use-after-free in SyncInitTrigger
+    (Closes: #1098907).
 
  -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 26 Feb 2025 09:58:58 +0100
 
