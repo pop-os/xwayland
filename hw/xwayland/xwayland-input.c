@@ -1284,12 +1284,11 @@ keyboard_handle_modifiers(void *data, struct wl_keyboard *keyboard,
         old_state = dev->key->xkbInfo->state;
         new_state = &dev->key->xkbInfo->state;
 
-        new_state->base_group = 0;
-        new_state->latched_group = 0;
         new_state->locked_group = group & XkbAllGroupsMask;
         new_state->base_mods = mods_depressed & XkbAllModifiersMask;
-        new_state->latched_mods = mods_latched & XkbAllModifiersMask;
         new_state->locked_mods = mods_locked & XkbAllModifiersMask;
+        XkbLatchModifiers(dev, XkbAllModifiersMask,
+                          mods_latched & XkbAllModifiersMask);
 
         XkbComputeDerivedState(dev->key->xkbInfo);
 
@@ -1677,7 +1676,6 @@ add_device(struct xwl_seat *xwl_seat,
     dev->public.devicePrivate = xwl_seat;
     dev->type = SLAVE;
     dev->spriteInfo->spriteOwner = FALSE;
-    dev->ignoreXkbActionsBehaviors = TRUE;
 
     return dev;
 }
@@ -3599,7 +3597,6 @@ InitInput(int argc, char *argv[])
 
     mieqInit();
 
-    inputInfo.keyboard->ignoreXkbActionsBehaviors = TRUE;
     xwl_screen->input_registry = wl_display_get_registry(xwl_screen->display);
     wl_registry_add_listener(xwl_screen->input_registry, &input_listener,
                              xwl_screen);

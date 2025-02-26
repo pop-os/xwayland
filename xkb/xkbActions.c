@@ -1368,12 +1368,9 @@ XkbHandleActions(DeviceIntPtr dev, DeviceIntPtr kbd, DeviceEvent *event)
                   (event->type == ET_ButtonPress));
 
     if (pressEvent) {
-        if (keyEvent) {
-            if (kbd->ignoreXkbActionsBehaviors)
-                act.type = XkbSA_NoAction;
-            else
-                act = XkbGetKeyAction(xkbi, &xkbi->state, key);
-        } else {
+        if (keyEvent)
+            act = XkbGetKeyAction(xkbi, &xkbi->state, key);
+        else {
             act = XkbGetButtonAction(kbd, dev, key);
             key |= BTN_ACT_FLAG;
         }
