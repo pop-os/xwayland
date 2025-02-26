@@ -1,6 +1,15 @@
 xwayland (2:24.1.6-1) UNRELEASED; urgency=medium
 
-  * New upstream release.
+  * New upstream release. Fixes:
+    - CVE-2025-26594
+    - CVE-2025-26595
+    - CVE-2025-26596
+    - CVE-2025-26597
+    - CVE-2025-26598
+    - CVE-2025-26599
+    - CVE-2025-26600
+    - CVE-2025-26601
+    - Closes: #1098907.
 
  -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 26 Feb 2025 09:58:58 +0100
 
