@@ -1,4 +1,4 @@
-xwayland (2:24.1.6-1) UNRELEASED; urgency=medium
+xwayland (2:24.1.6-1) unstable; urgency=medium
 
   * New upstream release. Fixes:
     - CVE-2025-26594: use-after-free of the root cursor
@@ -11,7 +11,7 @@ xwayland (2:24.1.6-1) UNRELEASED; urgency=medium
     - CVE-2025-26601: use-after-free in SyncInitTrigger
     (Closes: #1098907).
 
- -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 26 Feb 2025 09:58:58 +0100
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 26 Feb 2025 10:22:59 +0100
 
 xwayland (2:24.1.5-1) unstable; urgency=medium
 
