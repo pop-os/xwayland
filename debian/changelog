@@ -1,4 +1,4 @@
-xwayland (2:24.1.8-1) UNRELEASED; urgency=medium
+xwayland (2:24.1.8-1) unstable; urgency=medium
 
   * Add README.Debian.security to clarify how the security issues are
     inherited from the shared codebase with xorg-server, and don't
@@ -11,7 +11,7 @@ xwayland (2:24.1.8-1) UNRELEASED; urgency=medium
     - CVE-2025-49179
     - CVE-2025-49180
 
- -- Timo Aaltonen <tjaalton@debian.org>  Fri, 28 Feb 2025 12:40:26 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 27 Aug 2025 10:25:23 +0300
 
 xwayland (2:24.1.6-1) unstable; urgency=medium
 
