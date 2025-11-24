@@ -1005,7 +1005,7 @@ SyncCreateSystemCounter(const char *name,
         psci = malloc(sizeof(SysCounterInfo));
         if (!psci) {
             FreeResource(pCounter->sync.id, RT_NONE);
-            return pCounter;
+            return NULL;
         }
         pCounter->pSysCounterInfo = psci;
         psci->pCounter = pCounter;
@@ -2658,9 +2658,11 @@ IdleTimeQueryValue(void *pCounter, int64_t *pValue_return)
     int deviceid;
     CARD32 idle;
 
+    *pValue_return = 0;
     if (pCounter) {
         SyncCounter *counter = pCounter;
         IdleCounterPriv *priv = SysCounterGetPrivate(counter);
+        BUG_RETURN(priv == NULL);
         deviceid = priv->deviceid;
     }
     else
@@ -2674,6 +2676,7 @@ IdleTimeBlockHandler(void *pCounter, void *wt)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     int64_t idle, old_idle;
@@ -2764,6 +2767,7 @@ IdleTimeWakeupHandler(void *pCounter, int rc)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     int64_t idle;
@@ -2797,6 +2801,7 @@ IdleTimeBracketValues(void *pCounter, int64_t *pbracket_less,
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     Bool registered = (less || greater);
@@ -2834,8 +2839,10 @@ init_system_idle_counter(const char *name, int deviceid)
     if (idle_time_counter != NULL) {
         IdleCounterPriv *priv = malloc(sizeof(IdleCounterPriv));
 
-        priv->value_less = priv->value_greater = NULL;
-        priv->deviceid = deviceid;
+        if (priv) {
+            priv->value_less = priv->value_greater = NULL;
+            priv->deviceid = deviceid;
+        }
 
         idle_time_counter->pSysCounterInfo->private = priv;
     }

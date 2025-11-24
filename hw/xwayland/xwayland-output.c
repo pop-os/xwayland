@@ -718,7 +718,7 @@ xwl_output_set_name(struct xwl_output *xwl_output, const char *name)
     /* And leases' names as well */
     xorg_list_for_each_entry(lease, &pScrPriv->leases, list) {
         for (i = 0; i < lease->numOutputs; i++) {
-            if (!strcmp(name, pScrPriv->outputs[i]->name)) {
+            if (!strcmp(name, lease->outputs[i]->name)) {
                 ErrorF("A lease output named '%s' already exists", name);
                 return;
             }
