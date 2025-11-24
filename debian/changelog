@@ -1,4 +1,4 @@
-xwayland (2:24.1.9-1) UNRELEASED; urgency=medium
+xwayland (2:24.1.9-1) unstable; urgency=medium
 
   [ Alessandro Astone ]
   * Enable input emulation through XDG Desktop Portal (LP: #2075962)
@@ -10,7 +10,7 @@ xwayland (2:24.1.9-1) UNRELEASED; urgency=medium
     - CVE-2025-62230
     - CVE-2025-62231
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 24 Nov 2025 18:42:13 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 24 Nov 2025 19:17:29 +0200
 
 xwayland (2:24.1.8-1) unstable; urgency=medium
 
