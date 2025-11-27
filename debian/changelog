@@ -1,3 +1,9 @@
+xwayland (2:24.1.9-2) UNRELEASED; urgency=medium
+
+  * control: Bump build-depends on x11proto-dev.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 27 Nov 2025 16:04:09 +0200
+
 xwayland (2:24.1.9-1) unstable; urgency=medium
 
   [ Alessandro Astone ]
