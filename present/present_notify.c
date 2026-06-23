@@ -90,8 +90,10 @@ present_create_notifies(ClientPtr client, int num_notifies, xPresentNotify *x_no
         if (status != Success)
             goto bail;
 
-        added = i;
+        added++;
     }
+
+    *p_notifies = notifies;
     return Success;
 
 bail:

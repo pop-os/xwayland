@@ -24,6 +24,7 @@
  * SOFTWARE.
  */
 
+#include <math.h>
 #include <xwayland-config.h>
 
 #include <linux/input.h>
@@ -522,7 +523,9 @@ pointer_handle_enter(void *data, struct wl_pointer *pointer,
     int sx, sy;
     int dx, dy;
     ScreenPtr pScreen = xwl_screen->screen;
+    xwl_seat->pointer_enter_count++;
     ValuatorMask mask;
+    DeviceEvent enter;
 
     /* There's a race here where if we create and then immediately
      * destroy a surface, we might end up in a state where the Wayland
@@ -553,8 +556,10 @@ pointer_handle_enter(void *data, struct wl_pointer *pointer,
     (*pScreen->SetCursorPosition) (dev, pScreen, dx + sx, dy + sy, TRUE);
 
     miPointerInvalidateSprite(master);
+    init_device_event(&enter, dev, currentTime.milliseconds, EVENT_SOURCE_FOCUS);
+    enter.type = ET_Enter;
 
-    CheckMotion(NULL, master);
+    CheckMotion(&enter, master);
 
     /* Ideally, X clients shouldn't see these button releases.  When
      * the pointer leaves a window with buttons down, it means that
@@ -613,6 +618,9 @@ pointer_handle_leave(void *data, struct wl_pointer *pointer,
     Bool focus_lost = FALSE;
 
     xwl_screen->serial = serial;
+    BUG_WARN(xwl_seat->pointer_enter_count == 0);
+    if (xwl_seat->pointer_enter_count > 0)
+        xwl_seat->pointer_enter_count--;
 
     /* The pointer has left a known xwindow, save it for a possible match
      * in sprite_check_lost_focus()
@@ -1183,9 +1191,20 @@ keyboard_handle_keymap(void *data, struct wl_keyboard *keyboard,
 
     XkbUpdateDescActions(xkb, xkb->min_key_code, XkbNumKeys(xkb), &changes);
 
-    if (xwl_seat->keyboard->key)
+    memcpy(
+        xwl_seat->keyboard->kbdfeed->ctrl.autoRepeats,
+        xkb->ctrls->per_key_repeat,
+        XkbPerKeyBitArraySize
+    );
+    if (xwl_seat->keyboard->key) {
         /* Keep the current controls */
         XkbCopyControls(xkb, xwl_seat->keyboard->key->xkbInfo->desc);
+        memcpy(
+            xkb->ctrls->per_key_repeat,
+            xwl_seat->keyboard->kbdfeed->ctrl.autoRepeats,
+            XkbPerKeyBitArraySize
+        );
+    }
 
     XkbDeviceApplyKeymap(xwl_seat->keyboard, xkb);
 
@@ -1588,9 +1607,13 @@ find_toplevel_callback(void *resource, XID id, void *user_data)
     WindowPtr window = resource;
     WindowPtr *toplevel = user_data;
 
-    /* Pick the first realized toplevel we find */
-    if (*toplevel == NullWindow && window->realized && xwl_window_is_toplevel(window))
-        *toplevel = window;
+    while (*toplevel == NullWindow && window) {
+        /* Pick the first realized toplevel we find */
+        if (window->realized && xwl_window_is_toplevel(window))
+            *toplevel = window;
+        else
+            window = window->parent;
+    }
 }
 
 static WindowPtr
@@ -1901,7 +1924,10 @@ seat_handle_capabilities(void *data, struct wl_seat *seat,
         release_touch(xwl_seat);
     }
 
-    xwl_seat->xwl_screen->expecting_event--;
+    if (xwl_seat->caps_initialized == FALSE) {
+        xwl_seat->caps_initialized = TRUE;
+        xwl_seat->xwl_screen->expecting_event--;
+    }
 }
 
 static void
@@ -1952,6 +1978,7 @@ create_input_device(struct xwl_screen *xwl_screen, uint32_t id, uint32_t version
         wl_registry_bind(xwl_screen->registry, id,
                          &wl_seat_interface, min(version, seat_version));
     xwl_seat->id = id;
+    xwl_seat->caps_initialized = FALSE;
 
     xwl_cursor_init(&xwl_seat->cursor, xwl_seat->xwl_screen,
                     xwl_seat_update_cursor);
@@ -2172,22 +2199,17 @@ tablet_tool_down(void *data, struct zwp_tablet_tool_v2 *tool, uint32_t serial)
 {
     struct xwl_tablet_tool *xwl_tablet_tool = data;
     struct xwl_seat *xwl_seat = xwl_tablet_tool->seat;
-    ValuatorMask mask;
 
+    xwl_tablet_tool->tip = TRUE;
     xwl_seat->xwl_screen->serial = serial;
-
-    valuator_mask_zero(&mask);
-    QueuePointerEvents(xwl_tablet_tool->xdevice, ButtonPress, 1, 0, &mask);
 }
 
 static void
 tablet_tool_up(void *data, struct zwp_tablet_tool_v2 *tool)
 {
     struct xwl_tablet_tool *xwl_tablet_tool = data;
-    ValuatorMask mask;
 
-    valuator_mask_zero(&mask);
-    QueuePointerEvents(xwl_tablet_tool->xdevice, ButtonRelease, 1, 0, &mask);
+    xwl_tablet_tool->tip = FALSE;
 }
 
 static void
@@ -2310,7 +2332,7 @@ tablet_tool_button_state(void *data, struct zwp_tablet_tool_v2 *tool,
 {
     struct xwl_tablet_tool *xwl_tablet_tool = data;
     struct xwl_seat *xwl_seat = xwl_tablet_tool->seat;
-    uint32_t *mask = &xwl_tablet_tool->buttons_now;
+    uint32_t *mask = &xwl_tablet_tool->buttons;
     int xbtn = 0;
 
     /* BTN_0 .. BTN_9 */
@@ -2375,7 +2397,7 @@ tablet_tool_frame(void *data, struct zwp_tablet_tool_v2 *tool, uint32_t time)
 {
     struct xwl_tablet_tool *xwl_tablet_tool = data;
     ValuatorMask mask;
-    uint32_t released, pressed, diff;
+    uint32_t effective_buttons, released, pressed, diff;
     int button;
 
     valuator_mask_zero(&mask);
@@ -2391,9 +2413,14 @@ tablet_tool_frame(void *data, struct zwp_tablet_tool_v2 *tool, uint32_t time)
 
     valuator_mask_zero(&mask);
 
-    diff = xwl_tablet_tool->buttons_prev ^ xwl_tablet_tool->buttons_now;
-    released = diff & ~xwl_tablet_tool->buttons_now;
-    pressed = diff & xwl_tablet_tool->buttons_now;
+    effective_buttons = xwl_tablet_tool->buttons;
+    if (xwl_tablet_tool->tip) {
+        SetBit(&effective_buttons, 0);
+    }
+
+    diff = effective_buttons ^ xwl_tablet_tool->effective_buttons;
+    released = diff & ~effective_buttons;
+    pressed = diff & effective_buttons;
 
     button = 1;
     while (released) {
@@ -2413,7 +2440,7 @@ tablet_tool_frame(void *data, struct zwp_tablet_tool_v2 *tool, uint32_t time)
         pressed >>= 1;
     }
 
-    xwl_tablet_tool->buttons_prev = xwl_tablet_tool->buttons_now;
+    xwl_tablet_tool->effective_buttons = effective_buttons;
 
     while (xwl_tablet_tool->wheel_clicks) {
             if (xwl_tablet_tool->wheel_clicks < 0) {
@@ -3168,6 +3195,7 @@ sprite_check_lost_focus(SpritePtr sprite, WindowPtr window)
 {
     DeviceIntPtr device, master;
     struct xwl_seat *xwl_seat;
+    Bool pointer_crossing;
 
     for (device = inputInfo.devices; device; device = device->next) {
         /* Ignore non-wayland devices */
@@ -3183,6 +3211,7 @@ sprite_check_lost_focus(SpritePtr sprite, WindowPtr window)
     if (!xwl_seat)
         return FALSE;
 
+    pointer_crossing = (xwl_seat->pointer_enter_count > 0);
     master = GetMaster(device, POINTER_OR_FLOAT);
     if (!master || !master->lastSlave)
         return FALSE;
@@ -3205,7 +3234,7 @@ sprite_check_lost_focus(SpritePtr sprite, WindowPtr window)
          IsParent(xwl_seat->last_focus_window->toplevel, window)))
         return TRUE;
 
-    return FALSE;
+    return !pointer_crossing;
 }
 
 static WindowPtr
@@ -3256,26 +3285,30 @@ xwl_pointer_warp_emulator_set_fake_pos(struct xwl_pointer_warp_emulator *warp_em
 {
     struct zwp_locked_pointer_v1 *locked_pointer =
         warp_emulator->locked_pointer;
+    struct xwl_window *focus_window;
     WindowPtr window;
     int sx, sy;
 
     if (!warp_emulator->locked_pointer)
         return;
 
-    if (!warp_emulator->xwl_seat->focus_window)
+    focus_window = warp_emulator->xwl_seat->focus_window;
+    if (!focus_window)
         return;
 
-    window = warp_emulator->xwl_seat->focus_window->toplevel;
+    window = focus_window->toplevel;
     if (x >= window->drawable.x ||
         y >= window->drawable.y ||
         x < (window->drawable.x + window->drawable.width) ||
         y < (window->drawable.y + window->drawable.height)) {
-        sx = x - window->drawable.x;
-        sy = y - window->drawable.y;
+        sx = round((double) (x - window->drawable.x) /
+                             focus_window->viewport_scale_x);
+        sy = round((double) (y - window->drawable.y) /
+                             focus_window->viewport_scale_y);
         zwp_locked_pointer_v1_set_cursor_position_hint(locked_pointer,
                                                        wl_fixed_from_int(sx),
                                                        wl_fixed_from_int(sy));
-        wl_surface_commit(warp_emulator->xwl_seat->focus_window->surface);
+        wl_surface_commit(focus_window->surface);
     }
 }
 

@@ -639,9 +639,8 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                 }
                 if (err == FontNameAlias) {
                     free(resolved);
-                    resolved = malloc(resolvedlen + 1);
-                    if (resolved)
-                        memcpy(resolved, tmpname, resolvedlen + 1);
+                    resolved = XNFalloc(resolvedlen + 1);
+                    memcpy(resolved, tmpname, resolvedlen + 1);
                 }
             }
 
@@ -671,6 +670,10 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                  * is BadFontName, indicating the alias resolution
                  * is complete.
                  */
+                if (resolvedlen > XLFDMAXFONTNAMELEN) {
+                    err = BadFontName;
+                    goto ContBadFontName;
+                }
                 memcpy(tmp_pattern, resolved, resolvedlen);
                 if (c->haveSaved) {
                     char *tmpname;
@@ -929,10 +932,13 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
                 c->haveSaved = TRUE;
                 c->savedNumFonts = numFonts;
                 free(c->savedName);
-                c->savedName = malloc(namelen + 1);
-                if (c->savedName)
-                    memcpy(c->savedName, name, namelen + 1);
+                c->savedName = XNFalloc(namelen + 1);
+                memcpy(c->savedName, name, namelen + 1);
                 aliascount = 20;
+            }
+            if (namelen > XLFDMAXFONTNAMELEN) {
+                err = BadFontName;
+                goto ContBadFontName;
             }
             memmove(c->current.pattern, name, namelen);
             c->current.patlen = namelen;
@@ -1352,18 +1358,18 @@ int
 PolyText(ClientPtr client, DrawablePtr pDraw, GC * pGC, unsigned char *pElt,
          unsigned char *endReq, int xorg, int yorg, int reqType, XID did)
 {
-    PTclosureRec local_closure;
-
-    local_closure.pElt = pElt;
-    local_closure.endReq = endReq;
-    local_closure.client = client;
-    local_closure.pDraw = pDraw;
-    local_closure.xorg = xorg;
-    local_closure.yorg = yorg;
-    local_closure.reqType = reqType;
-    local_closure.pGC = pGC;
-    local_closure.did = did;
-    local_closure.err = Success;
+    PTclosureRec local_closure = {
+        .client = client,
+        .pDraw = pDraw,
+        .pGC = pGC,
+        .pElt = pElt,
+        .endReq = endReq,
+        .xorg = xorg,
+        .yorg = yorg,
+        .reqType = reqType,
+        .did = did,
+        .err = Success
+    };
 
     (void) doPolyText(client, &local_closure);
     return Success;
@@ -1687,7 +1693,8 @@ SetFontPath(ClientPtr client, int npaths, unsigned char *paths)
         int bad;
 
         err = SetFontPathElements(npaths, paths, &bad, FALSE);
-        client->errorValue = bad;
+        if (err != Success)
+            client->errorValue = bad;
     }
     return err;
 }

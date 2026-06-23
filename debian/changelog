@@ -1,14 +1,123 @@
-xwayland (2:24.1.2-1pop1) jammy; urgency=medium
+xwayland (2:24.1.12-1pop2) noble; urgency=medium
+
+  * New upstream release
+
+ -- Michael Murphy <michael@mmurphy.dev>  Tue, 23 Jun 2026 15:38:42 +0200
+
+xwayland (2:24.1.12-1) unstable; urgency=medium
+
+  * New upstream release. (Closes: #1138680)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 02 Jun 2026 11:58:56 +0300
+
+xwayland (2:24.1.11-1) unstable; urgency=medium
 
   * New upstream release.
 
- -- Ian Douglas Scott <idscott@system76.com>  Tue, 10 Sep 2024 13:52:10 -0700
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 28 Apr 2026 09:11:08 +0300
 
-xwayland (2:24.1.0-1pop1) jammy; urgency=medium
+xwayland (2:24.1.10-1) unstable; urgency=medium
 
-  * Backport to jammy
+  * New upstream release.
+    - CVE-2026-33999: XKB Integer Underflow in XkbSetCompatMap()
+    - CVE-2026-34000: XKB Out-of-bounds Read in CheckSetGeom()
+    - CVE-2026-34001: XSYNC Use-after-free in miSyncTriggerFence()
+    - CVE-2026-34002: XKB Out-of-bounds read in CheckModifierMap()
+    - CVE-2026-34003: XKB Buffer overflow in CheckKeyTypes()
+  * control: Bump build-depends on x11proto-dev.
 
- -- Michael Aaron Murphy <michael@mmurphy.dev>  Thu, 23 May 2024 08:49:51 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 14 Apr 2026 17:16:12 +0300
+
+xwayland (2:24.1.9-1) unstable; urgency=medium
+
+  [ Alessandro Astone ]
+  * Enable input emulation through XDG Desktop Portal (LP: #2075962)
+  * Actually set debian builder string
+
+  [ Timo Aaltonen ]
+  * New upstream release.
+    - CVE-2025-62229
+    - CVE-2025-62230
+    - CVE-2025-62231
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 24 Nov 2025 19:17:29 +0200
+
+xwayland (2:24.1.8-1) unstable; urgency=medium
+
+  * Add README.Debian.security to clarify how the security issues are
+    inherited from the shared codebase with xorg-server, and don't
+    actually apply to xwayland. Thanks, Moritz Muehlenhoff!
+  * New upstream release. (Closes: #1108369)
+    - CVE-2025-49175
+    - CVE-2025-49176
+    - CVE-2025-49177
+    - CVE-2025-49178
+    - CVE-2025-49179
+    - CVE-2025-49180
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 27 Aug 2025 10:25:23 +0300
+
+xwayland (2:24.1.6-1) unstable; urgency=medium
+
+  * New upstream release. Fixes:
+    - CVE-2025-26594: use-after-free of the root cursor
+    - CVE-2025-26595: buffer overflow in XkbVModMaskText
+    - CVE-2025-26596: heap overflow in XkbWriteKeySyms
+    - CVE-2025-26597: buffer overflow in XkbChangeTypesOfKey
+    - CVE-2025-26598: out-of-bounds write in CreatePointerBarrierClient
+    - CVE-2025-26599: use of uninitialized pointer in compRedirectWindow
+    - CVE-2025-26600: use-after-free in PlayReleasedEvents
+    - CVE-2025-26601: use-after-free in SyncInitTrigger
+    (Closes: #1098907).
+
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 26 Feb 2025 10:22:59 +0100
+
+xwayland (2:24.1.5-1) unstable; urgency=medium
+
+  * New upstream release.
+  * patches: Drop upstreamed patches.
+  * xwayland-Detect-gbm_bo_get_fd_for_plane-at-runtime.patch: Dropped,
+    likely unneeded by now for Xilinx.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 06 Feb 2025 09:56:57 +0200
+
+xwayland (2:24.1.4-3) unstable; urgency=medium
+
+  [ Alessandro Astone ]
+  * Add patch to fix possible crash after the previous backport
+    (LP: #2096653)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Jan 2025 13:17:11 +0200
+
+xwayland (2:24.1.4-2) unstable; urgency=medium
+
+  [ Alessandro Astone ]
+  * Backport patch to fix busy-loop on inactive VT (LP: #2043517)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 16 Dec 2024 14:27:57 +0200
+
+xwayland (2:24.1.4-1) unstable; urgency=medium
+
+  * New upstream release
+    + CVE-2024-9632: Heap-based buffer overflow privilege escalation in
+      _XkbSetCompatMap (closes: #1086244)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 30 Oct 2024 12:01:08 +0200
+
+xwayland (2:24.1.3-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 16 Oct 2024 13:13:19 +0300
+
+xwayland (2:24.1.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * control: Bump libdrm-dev build-dependency. (Closes: #1076005)
+  * patches: Refreshed.
+  * control: Migrate to pkgconf.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 08 Aug 2024 09:56:38 +0300
 
 xwayland (2:24.1.0-1) unstable; urgency=medium
 

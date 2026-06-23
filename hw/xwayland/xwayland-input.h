@@ -76,6 +76,8 @@ struct xwl_seat {
     struct xwl_window *tablet_focus_window;
     uint32_t id;
     uint32_t pointer_enter_serial;
+    uint8_t pointer_enter_count;
+    Bool caps_initialized;
     struct xorg_list link;
     CursorPtr x_cursor;
     OsTimerPtr x_cursor_timer;
@@ -148,8 +150,9 @@ struct xwl_tablet_tool {
     double rotation;
     double slider;
 
-    uint32_t buttons_now,
-             buttons_prev;
+    uint32_t buttons;
+    Bool tip;
+    uint32_t effective_buttons;
 
     int32_t wheel_clicks;
 

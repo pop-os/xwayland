@@ -402,9 +402,18 @@ xwl_output_find_mode(struct xwl_output *xwl_output,
     RROutputPtr output = xwl_output->randr_output;
     int i;
 
-    /* width & height -1 means we want the actual output mode, which is idx 0 */
-    if (width == -1 && height == -1 && output->modes)
-        return output->modes[0];
+    /* width & height -1 means we want the actual output mode */
+    if (width == -1 && height == -1) {
+        if (xwl_output->mode_width > 0 && xwl_output->mode_height > 0) {
+            /* If running rootful, use the current mode size to search for the mode */
+            width = xwl_output->mode_width;
+            height = xwl_output->mode_height;
+        }
+        else if (output->modes) {
+            /* else return the mode at first idx 0 */
+            return output->modes[0];
+        }
+    }
 
     for (i = 0; i < output->numModes; i++) {
         if (output->modes[i]->mode.width == width && output->modes[i]->mode.height == height)
@@ -709,7 +718,7 @@ xwl_output_set_name(struct xwl_output *xwl_output, const char *name)
     /* And leases' names as well */
     xorg_list_for_each_entry(lease, &pScrPriv->leases, list) {
         for (i = 0; i < lease->numOutputs; i++) {
-            if (!strcmp(name, pScrPriv->outputs[i]->name)) {
+            if (!strcmp(name, lease->outputs[i]->name)) {
                 ErrorF("A lease output named '%s' already exists", name);
                 return;
             }
@@ -898,6 +907,8 @@ xwl_output_create(struct xwl_screen *xwl_screen, uint32_t id,
     struct xwl_output *xwl_output;
     char name[MAX_OUTPUT_NAME] = { 0 };
 
+    --xwl_screen->expecting_event;
+
     xwl_output = calloc(1, sizeof *xwl_output);
     if (xwl_output == NULL) {
         ErrorF("%s ENOMEM\n", __func__);
@@ -946,7 +957,6 @@ xwl_output_create(struct xwl_screen *xwl_screen, uint32_t id,
      * use it when binding to the xdg-output protocol...
      */
     xorg_list_append(&xwl_output->link, &xwl_screen->output_list);
-    --xwl_screen->expecting_event;
 
     if (xwl_screen->xdg_output_manager)
         xwl_output_get_xdg_output(xwl_output);

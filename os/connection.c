@@ -242,7 +242,7 @@ void
 CreateWellKnownSockets(void)
 {
     int i;
-    int partial;
+    int partial = 0;
 
     /* display is initialized to "0" by main(). It is then set to the display
      * number if specified on the command line. */
@@ -281,6 +281,7 @@ CreateWellKnownSockets(void)
         int fd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
 
         ListenTransFds[i] = fd;
+        _XSERVTransSetOption(ListenTransConns[i], TRANS_CLOSEONEXEC, 0);
         SetNotifyFd(fd, EstablishNewConnections, X_NOTIFY_READ, NULL);
 
         if (!_XSERVTransIsLocal(ListenTransConns[i]))
