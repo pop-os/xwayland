@@ -1,4 +1,6 @@
+Version: 5
+
 #git=git://anongit.freedesktop.org/xorg/xserver
-version=3
-opts="pgpsigurlmangle=s/$/.sig/" \
-https://xorg.freedesktop.org/releases/individual/xserver/ xwayland-(.*)\.tar\.xz
+Source: https://xorg.freedesktop.org/releases/individual/xserver/
+Matching-Pattern: xwayland-(.*)\.tar\.xz
+Pgpsigurlmangle: s/$/.sig/
