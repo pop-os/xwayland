@@ -1,4 +1,4 @@
-xwayland (2:24.1.13-1) UNRELEASED; urgency=medium
+xwayland (2:24.1.13-1) unstable; urgency=medium
 
   * Team upload.
   * New upstream release.
@@ -7,7 +7,7 @@ xwayland (2:24.1.13-1) UNRELEASED; urgency=medium
   * Drop quilt build-dep, we're using source format 3.0.
   * Update watch file to version 5.
 
- -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 05 Aug 2026 12:13:11 +0200
+ -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 05 Aug 2026 12:20:57 +0200
 
 xwayland (2:24.1.12-1) unstable; urgency=medium
 
