@@ -7,7 +7,6 @@ Build-Depends:
  debhelper-compat (= 13),
  meson,
  pkgconf,
- quilt,
  libdecor-0-dev,
  libdrm-dev (>= 2.4.116),
  libei-dev,

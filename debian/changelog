@@ -4,6 +4,7 @@ xwayland (2:24.1.13-1) UNRELEASED; urgency=medium
   * New upstream release.
     -  CVE-2026-55999: glamor Font Atlas Heap Buffer Overflow
     -  CVE-2026-56000: GLX contextTags Use-After-Free in CommonMakeCurrent
+  * Drop quilt build-dep, we're using source format 3.0.
 
  -- Emilio Pozuelo Monfort <pochu@debian.org>  Wed, 05 Aug 2026 12:13:11 +0200
 
