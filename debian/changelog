@@ -1,3 +1,9 @@
+xwayland (2:24.1.13-1pop1) noble; urgency=medium
+
+  * Backport
+
+ -- Michael Murphy <michael@mmurphy.dev>  Fri, 14 Aug 2026 15:01:05 +0200
+
 xwayland (2:24.1.13-1) unstable; urgency=medium
 
   * Team upload.
